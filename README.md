@@ -46,6 +46,29 @@ Kiến trúc tách bạch tuyệt đối dữ liệu gốc khỏi tầng phục 
 2. Kho lưu trữ chỉ cấp bản sao sâu (`copy.deepcopy`) để tầng nhiễu không thể làm biến đổi dữ liệu gốc trong kho.
 3. Kênh nhiễu giữ nguyên mã `crc32` cũ trên mỗi read sau khi gây substitution, buộc tầng phục hồi phải tự phát hiện sai lệch bằng biểu quyết đa số (*consensus*) và kiểm tra CRC-32.
 
+### 1.4. Vai trò và cơ chế của SHA-256 trong kiểm chứng toàn vẹn
+**SHA-256** (*Secure Hash Algorithm 256-bit*) là hàm băm mật mã học một chiều (`hashlib.sha256`), ánh xạ một dãy byte đầu vào có kích thước bất kỳ thành một chuỗi "vân tay số" cố định dài **256 bit (`32 bytes` = `64` ký tự hex chữ thường)**. Trong hệ thống, SHA-256 giữ vai trò **"chốt chặn kiểm chứng cuối cùng"** với 3 đặc tính cốt lõi:
+
+- **Tính xác định (*Deterministic*):** Cùng một tệp gốc luôn sinh ra duy nhất một mã SHA-256 (ví dụ `sample_medium.txt` 800 B luôn có mã `932aa3de6f5b1feb058db17623a2958fb161f73e664ba50875a96a19945731dc`, ghi nhận trong [experiment_conditions.json](./results/experiment_conditions.json)).
+- **Hiệu ứng tuyết lở (*Avalanche Effect*):** Chỉ cần sai lệch đúng **1 bit** (tương ứng đổi nhầm 1/2 nucleotide, ví dụ `A` `00` → `T` `01`) ở bất kỳ chunk nào trong toàn tệp, mã SHA-256 đầu ra thay đổi hoàn toàn, giúp phát hiện tức thì cả các lỗi ghép sai thứ tự packet hoặc cắt sai phần đệm `0x00` ở chunk cuối.
+- **Kháng va chạm (*Collision Resistance*):** Không gian $2^{256}$ giá trị khiến xác suất hai tệp khác nhau trùng mã băm là vô cùng nhỏ, đồng thời tính chất một chiều không cho phép suy ngược nội dung tệp từ chuỗi hash.
+
+#### Phân biệt vai trò giữa `CRC-32` (cấp Packet) và `SHA-256` (cấp Toàn tệp)
+
+| Tiêu chí | `CRC-32` (`crc32`) | `SHA-256` (`expected_sha256`) |
+| :--- | :--- | :--- |
+| **Kích thước** | `32 bit` (`8` ký tự hex) | `256 bit` (`64` ký tự hex) |
+| **Phạm vi tính** | Từng khối `32 B` đã đệm | Toàn bộ mảng `bytes` tệp gốc |
+| **Tầng sử dụng** | Tầng phục hồi (`dna_encoder` → `ecc_codec`) | Tầng kiểm định bên ngoài (`orchestrator`) |
+| **Mục đích** | Phát hiện nhanh packet bị *substitution*, cứu hòa phiếu 1–1 (*CRC-32 fallback*) và đánh dấu *erasure* cho XOR Parity | Xác nhận tệp sau ghép trùng **100% từng bit** với bản gốc; quyết định `sha256_match = True/False` |
+| **Quyền truy cập ở tầng phục hồi** | **Được truyền vào** (giữ nguyên mã cũ qua kênh nhiễu) | **Bị ẩn hoàn toàn** qua `recovery_view(metadata)` (`OI-10`) |
+
+#### Vòng đời của SHA-256 qua các module `.py`
+1. **Khởi tạo tại Bước 1 ([orchestrator.py](./dnastore/orchestrator.py)):** Hàm `sha256_hex(data)` tính `original_hash` ngay khi nạp tệp gốc.
+2. **Kiểm tra chéo tại Bước 2 ([dna_encoder.py](./dnastore/dna_encoder.py)):** `encode_file()` tính `expected_sha256 = compute_sha256(raw_bytes)` gắn vào `metadata`; `orchestrator` đối chiếu `md["expected_sha256"] == original_hash` để bảo đảm encoder không nhận nhầm dữ liệu (`FAIL_ENCODER_ERROR` nếu lệch).
+3. **Cô lập trước Bước 6 ([metadata_manager.py](./dnastore/metadata_manager.py)):** Khi gọi tầng phục hồi, `orchestrator` đặt `PASS_HASH_TO_RECOVERY = False` và truyền `recovery_view(stored_md)` (đã xóa khóa `expected_sha256`). Nhờ vậy bộ giải mã không thể dùng hash gốc làm công cụ dò đoán tổ hợp reads đúng (*oracle/brute-force*). Nếu gọi `ecc_codec.decode_or_recover()` độc lập ngoài `orchestrator` với metadata có sẵn `expected_sha256`, hàm tự gọi `verify_sha256()` trong [dna_decoder.py](./dnastore/dna_decoder.py).
+4. **Phán quyết cuối tại Bước 7–8 ([orchestrator.py](./dnastore/orchestrator.py)):** Chỉ khi thỏa mãn đồng thời `out == data` và `sha256_hex(out) == original_hash`, hệ thống mới trả `success = True`, `sha256_match = True` và xuất `recovered_bytes`; nếu sai dù chỉ 1 bit (ví dụ chạy bản `mocks.py` không có CRC-32 để lọt lỗi substitution), hệ thống trả `FAIL_HASH_MISMATCH`, `recovered_bytes = None`.
+
 ---
 
 ## 2. Kiến trúc 9 bước & Luồng chạy chi tiết (Trace qua `sample_medium.txt`)
@@ -56,8 +79,8 @@ Kiến trúc tách bạch tuyệt đối dữ liệu gốc khỏi tầng phục 
 
 ### Bước 1 — Đọc tệp gốc & tính dấu vân tay SHA-256 (`orchestrator.py`)
 - Hàm `_load_input()` đọc đầu vào (`bytes`, đường dẫn tệp, hoặc `(filename, bytes)`) thành mảng `800 bytes` thô.
-- Tính mã băm SHA-256 gốc (`64` ký tự hex) một lần duy nhất: `original_hash = sha256_hex(data)`.
-- Kiểm tra hợp lệ `seed` và `RunConfig.from_dict(config)`. Tệp gốc được giữ tại `orchestrator`, **chỉ** đưa vào Bước 2 (mã hóa) và Bước 7 (đối chiếu cuối).
+- Tính mã băm SHA-256 gốc (`256 bit` = `64` ký tự hex) một lần duy nhất qua `original_hash = sha256_hex(data)` (xem chi tiết cơ chế SHA-256 ở [Mục 1.4](#14-vai-trò-và-cơ-chế-của-sha-256-trong-kiểm-chứng-toàn-vẹn)).
+- Kiểm tra hợp lệ `seed` và `RunConfig.from_dict(config)`. Tệp gốc và `original_hash` được giữ tại `orchestrator`, không đi vào kho hay tầng phục hồi.
 
 ### Bước 2 — Chia khối, đệm, mã hóa 2 bit/nt & sinh dự phòng (`dna_encoder.py` + `ecc_codec.py`)
 - **Chia khối & đệm `0x00`:** `800 bytes` được cắt theo `chunk_size = 32 bytes` thành `25` khối `DATA` (`packet_id` từ `0` đến `24`). Nếu tệp không chia hết cho `32` (ví dụ `sample_short.txt` `166 bytes` → khối cuối `6 bytes`), bộ mã hóa đệm thêm `26` byte `0x00` ở khối cuối, ghi `payload_len = 6` và `file_size = 166` để tầng giải mã cắt đúng phần đệm.
