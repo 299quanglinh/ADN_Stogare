@@ -1,0 +1,4 @@
+DỰ ÁN CUỐI KỲ: NGHIÊN CỨU KIẾN TRÚC VÀ MÔ HÌNH HÓA HỆ THỐNG LƯU TRỮ DỮ LIỆU BẰNG ADN
+Nhóm thực hiện: Thái (Kiến trúc & Storage Controller) – Trung (Encoder/Decoder & ECC) – Linh (Noise Simulator & Recovery Pipeline) – Dũng (Streamlit UI & Benchmark).
+Câu hỏi nghiên cứu: Trong một mô hình lưu trữ ADN số, việc bổ sung dữ liệu dự phòng (XOR Parity, nhân bản 3 bản sao, Hybrid) làm thay đổi khả năng tái tạo tệp như thế nào khi xảy ra lỗi mất đoạn (dropout) hoặc thay thế nucleotide (substitution)?
+Dữ liệu tiếng Việt đầy đủ dấu thanh để kiểm thử UTF-8: Á, À, Ả, Ã, Ạ, Ă, Â, Đ, Ê, Ô, Ơ, Ư; kèm chữ số 0123456789 và ký tự đặc biệt !@#$%&*()-_=+.

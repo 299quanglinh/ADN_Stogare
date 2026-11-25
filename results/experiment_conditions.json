@@ -1,0 +1,32 @@
+{
+  "pipeline": "dnastore.orchestrator.run_simulation",
+  "backends": {
+    "encode_file": "real",
+    "apply_noise": "real",
+    "decode_or_recover": "real"
+  },
+  "python_version": "3.10.16 (main, Apr  8 2025, 01:38:46) [GCC 12.2.0]",
+  "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+  "trials_per_level": 30,
+  "total_runs": 2160,
+  "chunk_size": 32,
+  "group_size": 4,
+  "replication_copies": 3,
+  "sample_files": [
+    {
+      "filename": "sample_short.txt",
+      "size_bytes": 166,
+      "sha256": "9c9cea8f0b0d6bb02e7923bc9f659cb80831c4bffc5e5b7831daeb449a28ff62"
+    },
+    {
+      "filename": "sample_medium.txt",
+      "size_bytes": 800,
+      "sha256": "932aa3de6f5b1feb058db17623a2958fb161f73e664ba50875a96a19945731dc"
+    },
+    {
+      "filename": "sample_long.txt",
+      "size_bytes": 1955,
+      "sha256": "594ed6956ba105b5defd81d6c03ec2e80a423edc92bd39e3d72df7c2e724275f"
+    }
+  ]
+}

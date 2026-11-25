@@ -1,0 +1,2 @@
+Dự án lưu trữ dữ liệu bằng phân tử ADN (nhóm Thái – Trung – Linh – Dũng).
+Kiểm thử mã hóa 2 bit/nucleotide: 00->A, 01->T, 10->G, 11->C.
