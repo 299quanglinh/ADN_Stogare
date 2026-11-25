@@ -10,9 +10,9 @@ Tài liệu này tổng hợp các hạng mục còn lại cần hoàn thành t�
 | :--- | :---: | :--- |
 | Lõi `dnastore/` (Thái + Trung + Linh) | **Đã xong** | 14 file trong `dnastore/`, 48/48 test PASS, `cli.py demo` chạy chuẩn 3 ca. |
 | Thực nghiệm định lượng `results/` | **Đã xong** | Đã có `test_cases.csv` (24/24), `benchmark_results.csv` (2.160 lượt), `benchmark_summary.csv`, `experiment_conditions.json`, và 2 biểu đồ PNG. |
-| Kho Git chung & Tag `api-v1.0` | **Đang hoàn thiện** | Đã đẩy mã nguồn lên nhánh `main` tại `https://github.com/299quanglinh/ADN_Stogare`; còn chốt OI-17 (`requirements.txt`), quy ước nhánh và gắn tag `api-v1.0` (OI-19). |
-| Giao diện Streamlit (`app.py`) | **Chưa có** | Chưa có tệp `app.py` trong `dna-storage/`. |
-| Thư mục tài liệu `docs/` (`user_guide.md`, v.v.) | **Chưa có** | Chưa có thư mục `docs/` trong `dna-storage/`. |
+| Kho Git chung & Tag `api-v1.0` | **Đã xong** | Đã đẩy mã nguồn lên nhánh `main` tại `https://github.com/299quanglinh/ADN_Stogare`, chốt OI-17 (`requirements.txt`), quy ước nhánh và gắn tag `api-v1.0` (OI-19). |
+| Giao diện Streamlit (`app.py`) | **Chưa có** | Chưa có tệp `app.py` trong `dna-storage/` (Dũng phát triển trên nhánh riêng dựa trên tag `api-v1.0`). |
+| Thư mục tài liệu `docs/` | **Đang hoàn thiện** | Đã có `docs/api_contract.md` và `docs/architecture.png`; còn bổ sung `docs/user_guide.md` (Dũng) và `docs/noise_spec.md` (Linh). |
 | Tệp mẫu nhị phân (`PNG` / `PDF`) | **Chưa có** | `data/samples/` mới có 3 tệp `.txt` (hiện `test_orchestrator.py` kiểm thử nhị phân bằng `PNGLIKE` trong bộ nhớ). |
 
 ---
@@ -23,13 +23,13 @@ Tài liệu này tổng hợp các hạng mục còn lại cần hoàn thành t�
 
 - [x] **Đưa gói `dna-storage/` lên kho Git chung:**
   - Đã khởi tạo Git và push mã nguồn lên nhánh `main` tại `https://github.com/299quanglinh/ADN_Stogare`.
-- [ ] **Chốt OI-17 (`requirements.txt`):**
-  - Kiểm tra cài đặt sạch `pip install -r requirements.txt` (`matplotlib>=3.7`, `pytest>=7.4`, `streamlit>=1.32`, `pandas>=2.0`) và xác nhận tương thích Python 3.10+ trên cả Windows/Linux.
-- [ ] **Chốt OI-19 (Quy ước nhánh & Tag `api-v1.0`):**
-  - Đóng băng phiên bản API v1.0 bằng Git tag `api-v1.0`, thống nhất nhánh làm việc cho Dũng khi ghép `app.py` (tránh sửa đụng các file lõi trong `dnastore/`).
-- [ ] **Bổ sung tài liệu kiến trúc vào `docs/` (nếu cần đồng bộ vào repo):**
-  - Thêm `docs/api_contract.md` và sơ đồ kiến trúc `architecture.png` vào kho Git.
-- [ ] **Bàn giao thẳng cho Dũng:** Gửi link repo, tag `api-v1.0`, cách gọi `run_simulation()` và 3 ca preset demo chuẩn.
+- [x] **Chốt OI-17 (`requirements.txt`):**
+  - Đã kiểm chứng cài đặt sạch trên môi trường `.venv` mới (`pip install -r requirements.txt` -> `pip check` không lỗi, `pytest` đạt `48 passed, 40 subtests passed`, `dnastore.cli demo` 3/3 OK, `Streamlit 1.67.0`), hỗ trợ Python 3.10+.
+- [x] **Chốt OI-19 (Quy ước nhánh & Tag `api-v1.0`):**
+  - Đã thống nhất quy ước nhánh (`main` ổn định; Dũng tạo nhánh `feat/streamlit-ui` và không sửa logic lõi `dnastore/`), đồng thời đóng băng API bằng Git tag `api-v1.0`.
+- [x] **Bổ sung tài liệu kiến trúc vào `docs/`:**
+  - Đã tạo [docs/api_contract.md](./docs/api_contract.md) và [docs/architecture.png](./docs/architecture.png) và đẩy lên repo.
+- [ ] **Gửi bàn giao trực tiếp cho Dũng:** Gửi link repo, tag `api-v1.0`, tài liệu [docs/api_contract.md](./docs/api_contract.md) và 3 ca preset demo chuẩn để Dũng bắt tay code `app.py`.
 
 ---
 

@@ -1,4 +1,5 @@
-# Lõi hệ thống dnastore và bộ 48 test chạy bằng 100% thư viện chuẩn Python 3.10+
+# Đã chốt OI-17: yêu cầu Python 3.10+ (lõi dnastore và 48 test chạy bằng 100% thư viện chuẩn).
+# Đã kiểm chứng cài sạch trong venv mới (pip check OK, pytest 48 passed, cli demo OK, streamlit 1.67.0).
 # Các thư viện tùy chọn dưới đây phục vụ vẽ biểu đồ benchmark và giao diện Streamlit (Dũng):
 matplotlib>=3.7
 pytest>=7.4

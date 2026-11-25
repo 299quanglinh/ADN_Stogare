@@ -1,6 +1,6 @@
 # Hệ thống Mô phỏng Lưu trữ Dữ liệu bằng Phân tử ADN (`dna-storage`)
 
-> **Trạng thái hiện tại:** Đã hoàn tất tích hợp và kiểm chứng **100% lõi mô phỏng (`backends = real`)** giữa **Thái + Trung + Linh** (`48/48` ca kiểm thử tự động PASS, `24/24` ca chuẩn T01–T08 PASS, `2.160` lượt benchmark định lượng thật). Hệ thống sẵn sàng cho **Dũng** ghép giao diện Streamlit (`app.py`) và hoàn thiện các bước cuối để chốt nộp bài (chi tiết xem [CONGVIECCANLAM.md](./CONGVIECCANLAM.md)).
+> **Trạng thái hiện tại:** Đã hoàn tất tích hợp và kiểm chứng **100% lõi mô phỏng (`backends = real`)** giữa **Thái + Trung + Linh** (`48/48` ca kiểm thử tự động PASS, `24/24` ca chuẩn T01–T08 PASS, `2.160` lượt benchmark định lượng thật). Đã có tài liệu hợp đồng API [docs/api_contract.md](./docs/api_contract.md) và sơ đồ kiến trúc [docs/architecture.png](./docs/architecture.png); sẵn sàng cho **Dũng** ghép giao diện Streamlit (`app.py`) và hoàn thiện các bước cuối để chốt nộp bài (chi tiết xem [CONGVIECCANLAM.md](./CONGVIECCANLAM.md)).
 
 ---
 
@@ -55,7 +55,7 @@ Toàn bộ luồng thực thi do `dnastore.orchestrator.run_simulation()` điề
 | :--- | :--- | :---: | :--- |
 | **Trung** | Mã hóa/Giải mã ADN & ECC | **100%** *(lõi)* | Hoàn thiện `dna_encoder.py`, `dna_decoder.py`, `ecc_codec.py`, bộ test `test_codec.py`; hỗ trợ `ecc_params` (OI-03/OI-04) và `expected_sha256` tùy chọn cho `recovery_view` (OI-10). |
 | **Linh** | Kênh nhiễu, Recovery Pipeline & Thực nghiệm | **100%** *(lõi & benchmark)* | Hoàn thiện `noise_simulator.py`, `recovery_pipeline.py`, bộ test `test_noise_simulator.py` và `test_recovery.py` (T01–T08), thực thi `benchmark.py` (2.160 lượt chạy thật) và sinh toàn bộ CSV/biểu đồ trong `results/`. |
-| **Thái** | Kiến trúc, Storage Controller & Tích hợp | **~95%** | Hoàn thiện khung `dnastore/` (`models.py`, `errors.py`, `metadata_manager.py`, `storage_controller.py`, `backends.py`, `mocks.py`, `orchestrator.py`, `cli.py`), kiểm thử `test_storage.py` và `test_orchestrator.py`, hợp nhất gói `dna-storage/`. Còn đưa lên Git chung, chốt tag `api-v1.0` và ghép báo cáo cuối kỳ. |
+| **Thái** | Kiến trúc, Storage Controller & Tích hợp | **~98%** | Hoàn thiện khung `dnastore/` (`models.py`, `errors.py`, `metadata_manager.py`, `storage_controller.py`, `backends.py`, `mocks.py`, `orchestrator.py`, `cli.py`), kiểm thử `test_storage.py` và `test_orchestrator.py`, đẩy repo Git chung, hoàn thiện `docs/api_contract.md` và `docs/architecture.png`. Còn ghép hoàn chỉnh Báo cáo cuối kỳ (Phần 1–5) sau khi Dũng xong UI. |
 | **Dũng** | Giao diện Streamlit, Trình bày Benchmark & Demo | **Chờ triển khai** | Chưa có `app.py` và `docs/user_guide.md` trong gói hiện tại. Toàn bộ hàm backend `run_simulation()` cùng dữ liệu/biểu đồ thật trong `results/` đã sẵn sàng để nối trực tiếp. |
 
 ### 7 sai lệch kiến trúc đã xử lý triệt để khi hợp nhất gói `dna-storage/`
@@ -72,15 +72,18 @@ Toàn bộ luồng thực thi do `dnastore.orchestrator.run_simulation()` điề
 
 ## 4. Cấu trúc thư mục hiện tại
 
-Dưới đây là cấu trúc **thực tế hiện có** trên đĩa trong `dna-storage/` (các tệp chưa triển khai như `app.py` và `docs/` được theo dõi trong [CONGVIECCANLAM.md](./CONGVIECCANLAM.md)):
+Dưới đây là cấu trúc **thực tế hiện có** trên đĩa trong `dna-storage/` (các tệp chưa triển khai như `app.py` và `docs/user_guide.md` được theo dõi trong [CONGVIECCANLAM.md](./CONGVIECCANLAM.md)):
 
 ```text
 dna-storage/
 ├── README.md                         # Tài liệu tổng quan dự án & API hiện hành
 ├── CONGVIECCANLAM.md                 # Danh sách công việc tiếp theo cần chốt để nộp bài
-├── requirements.txt                  # Phụ thuộc tối thiểu (lõi chạy stdlib Python 3.10+; tùy chọn streamlit/matplotlib/pandas/pytest)
+├── requirements.txt                  # Phụ thuộc đã chốt (lõi chạy stdlib Python 3.10+; tùy chọn streamlit/matplotlib/pandas/pytest)
 ├── .gitignore
 ├── benchmark.py                      # Chạy thực nghiệm 2.160 lượt qua run_simulation() (backends=real)
+├── docs/
+│   ├── api_contract.md               # [Thái] Hợp đồng API v1.0, schema 21 trường, OI-01..OI-19 & hướng dẫn tích hợp UI
+│   └── architecture.png              # [Thái] Sơ đồ kiến trúc 9 bước và ranh giới cách ly học thuật (OI-10)
 ├── dnastore/                         # Gói lõi dùng chung (100% thư viện chuẩn Python)
 │   ├── __init__.py                   # Export các API công khai của gói
 │   ├── errors.py                     # [Thái] Ngoại lệ chuẩn gắn mã Reason
